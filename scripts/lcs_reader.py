@@ -129,6 +129,7 @@ LCS_END_MAGIC = 0x123456789ABCDEF0
 N_MOST_COMMON = 16
 N_MOST_COMMON_PRINT = 4
 
+
 def parse_stat(b, print_stat=True):
     # basic info
     (
@@ -165,29 +166,23 @@ def parse_stat(b, print_stat=True):
     )
     skewness = struct.unpack("<d", b[544 : 544 + 8])[0]
 
-    # tenant 
-    n_tenant = struct.unpack(
-        "<I", b[544 + 8 : 544 + 8 + 4]
-    )[0]
+    # tenant
+    n_tenant = struct.unpack("<I", b[544 + 8 : 544 + 8 + 4])[0]
     most_common_tenant = struct.unpack(
         "<" + "I" * N_MOST_COMMON, b[556 : 556 + N_MOST_COMMON * 4]
     )
     most_common_tenant_ratio = struct.unpack(
         "<" + "f" * N_MOST_COMMON, b[620 : 620 + N_MOST_COMMON * 4]
     )
-    
+
     # ttl
-    n_ttl, smallest_ttl, largest_ttl = struct.unpack(
-        "<III", b[684: 684 + 12]
-    )
+    n_ttl, smallest_ttl, largest_ttl = struct.unpack("<III", b[684 : 684 + 12])
     most_common_ttl = struct.unpack(
         "<" + "I" * N_MOST_COMMON, b[696 : 696 + N_MOST_COMMON * 4]
     )
     most_common_ttl_ratio = struct.unpack(
         "<" + "f" * N_MOST_COMMON, b[760 : 760 + N_MOST_COMMON * 4]
     )
-    
-    
 
     if print_stat:
         print("####################### trace stat ########################")
@@ -210,24 +205,31 @@ def parse_stat(b, print_stat=True):
             )
         print("....")
 
-        print(f"highest_freq: {highest_freq[:N_MOST_COMMON_PRINT]}, skewness: {skewness:.4f}")
+        print(
+            f"highest_freq: {highest_freq[:N_MOST_COMMON_PRINT]}, skewness: {skewness:.4f}"
+        )
         print(f"most_common_freq: ", end="")
         for i in range(N_MOST_COMMON_PRINT):
             if most_common_freq_ratio[i] == 0:
                 break
             print(f"{most_common_freq[i]}({most_common_freq_ratio[i]:.4f}), ", end="")
         print("....")
-        
-        if n_tenant > 0:
+
+        if n_tenant > 1:
             print(f"n_tenant: {n_tenant}, most_common_tenant: ", end="")
             for i in range(N_MOST_COMMON_PRINT):
                 if most_common_tenant_ratio[i] == 0:
                     break
-                print(f"{most_common_tenant[i]}({most_common_tenant_ratio[i]:.4f}), ", end="")
+                print(
+                    f"{most_common_tenant[i]}({most_common_tenant_ratio[i]:.4f}), ",
+                    end="",
+                )
             print("....")
-            
+
         if n_ttl > 1:
-            print(f"n_ttl: {n_ttl}, smallest_ttl: {smallest_ttl}, largest_ttl: {largest_ttl}")
+            print(
+                f"n_ttl: {n_ttl}, smallest_ttl: {smallest_ttl}, largest_ttl: {largest_ttl}"
+            )
             print(f"most_common_ttl: ", end="")
             for i in range(N_MOST_COMMON_PRINT):
                 if most_common_ttl_ratio[i] == 0:
@@ -280,12 +282,12 @@ def print_trace(ifilepath, n_max_req=-1, print_stat=True, print_header=True):
             next_access_vtime = req[3]
         elif version == 2:
             op = OP_NAMES[req[3] & 0xFF]
-            tenant = (req[3]>>8) & 0xFFFFFF
+            tenant = (req[3] >> 8) & 0xFFFFFF
             next_access_vtime = req[4]
             print(f",{op},{tenant}", end="")
         elif version >= 3:
             op = OP_NAMES[req[3] & 0xFF]
-            tenant = (req[3]>>8) & 0xFFFFFF
+            tenant = (req[3] >> 8) & 0xFFFFFF
             ttl = req[4]
             next_access_vtime = req[5]
             features = req[6:]

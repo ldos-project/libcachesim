@@ -31,6 +31,7 @@ int main(int argc, char *argv[]) {
     snprintf(args.ofilepath, OFILEPATH_LEN, "%s.%s", args.trace_path, args.output_format);
   }
 
+  INFO("output format %s, output path %s\n", args.output_format, args.ofilepath);
   if (strcasecmp(args.output_format, "lcs") == 0 || strcasecmp(args.output_format, "lcs_v1") == 0) {
     traceConv::convert_to_lcs(args.reader, args.ofilepath, args.output_txt, args.remove_size_change, 1);
   } else if (strcasecmp(args.output_format, "lcs_v2") == 0) {

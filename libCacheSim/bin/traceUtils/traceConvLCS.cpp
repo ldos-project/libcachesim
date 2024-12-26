@@ -184,6 +184,7 @@ static void _write_lcs_header(std::ofstream &ofile, lcs_trace_stat_t &stat, int6
 static void _analyze_trace(lcs_trace_stat_t &stat, const std::unordered_map<uint64_t, struct obj_info> &obj_map,
                            const std::unordered_map<int32_t, int32_t> &tenant_cnt,
                            const std::unordered_map<int32_t, int32_t> &ttl_cnt) {
+  INFO("########################################\n");
   INFO("trace stat: n_req %lld, n_obj %lld, n_byte %lld (%.2lf GiB), n_uniq_byte %lld (%.2lf GiB)\n",
        (long long)stat.n_req, (long long)stat.n_obj, (long long)stat.n_req_byte, (double)stat.n_req_byte / GiB,
        (long long)stat.n_obj_byte, (double)stat.n_obj_byte / GiB);
@@ -314,6 +315,7 @@ static void _analyze_trace(lcs_trace_stat_t &stat, const std::unordered_map<uint
          stat.most_common_ttls[2], stat.most_common_ttl_ratio[2], stat.most_common_ttls[3],
          stat.most_common_ttl_ratio[3]);
   }
+  INFO("########################################\n");
 }
 
 /**
