@@ -40,10 +40,10 @@ int main(int argc, char *argv[]) {
     if (args.print_obj_id_only) {
       printf("%lu\n", (unsigned long)req->obj_id);
     } else {
-      printf("%ld%c%lu%c%d", (long)req->clock_time, args.delimiter, (unsigned long)req->obj_id, args.delimiter,
-             (int)req->obj_size);
+      printf("%lld%c%llu%c%lld", (long long)req->clock_time, args.delimiter, (unsigned long long)req->obj_id, args.delimiter,
+             (long long)req->obj_size);
       if (trace_has_next_access_vtime) {
-        printf("%c%ld\n", args.delimiter, (long)req->next_access_vtime);
+        printf("%c%lld\n", args.delimiter, (long long)req->next_access_vtime);
       } else {
         printf("\n");
       }

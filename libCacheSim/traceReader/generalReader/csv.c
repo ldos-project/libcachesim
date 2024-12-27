@@ -226,7 +226,7 @@ static inline void csv_cb1(void *s, size_t len, void *data) {
     int64_t ts = (int64_t)strtod((char *)s, NULL);
     req->clock_time = ts;
   } else if (csv_params->curr_field_idx == csv_params->obj_size_field_idx) {
-    req->obj_size = (int64_t)strtoul((char *)s, &end, 0);
+    req->obj_size = (int64_t)strtoll((char *)s, &end, 0);
     if (req->obj_size == 0 && end == s) {
       WARN("csvReader obj_size is not a number: \"%s\"\n", (char *)s);
     }
