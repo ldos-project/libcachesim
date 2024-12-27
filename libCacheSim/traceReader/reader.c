@@ -473,7 +473,7 @@ void reset_reader(reader_t *const reader) {
 
 #ifdef SUPPORT_ZSTD_TRACE
   if (reader->is_zstd_file) {
-    fseek(reader->zstd_reader_p->ifile, 0, SEEK_SET);
+    reset_zstd_reader(reader->zstd_reader_p);
   }
 #endif
 
@@ -486,9 +486,6 @@ void reset_reader(reader_t *const reader) {
   } else {
     reader->mmap_offset = reader->trace_start_offset;
     curr_offset = reader->mmap_offset;
-    if (reader->trace_start_offset != 0) {
-      _read_bytes(reader, reader->trace_start_offset);
-    }
   }
 
   DEBUG("reset reader current offset %ld\n", curr_offset);
