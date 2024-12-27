@@ -99,7 +99,7 @@ static int oracleSysTwrNSBin_read_one_req(reader_t *reader, request_t *req) {
   if (req->val_size == 0 && reader->ignore_size_zero_req && (req->op == OP_GET || req->op == OP_GETS) &&
       reader->read_direction == READ_FORWARD) {
     ERROR("find size 0 request\n");
-    print_request(req, WARN_LEVEL);
+    print_request(req);
     return oracleSysTwrNSBin_read_one_req(reader, req);
   }
 

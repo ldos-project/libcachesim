@@ -10,9 +10,7 @@ extern "C" {
 
 void print_head_requests(request_t *req, uint64_t req_cnt) {
   if (req_cnt < 2) {
-    print_request(req, INFO_LEVEL);
-  } else if (req_cnt < 10) {
-    print_request(req, DEBUG_LEVEL);
+    print_request(req);
   }
 }
 

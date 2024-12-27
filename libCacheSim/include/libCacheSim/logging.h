@@ -105,10 +105,6 @@ extern pthread_mutex_t log_mtx;
   } while (0)
 
 static inline void log_header(int level, const char *file, int line) {
-  //  if (level < LOGLEVEL) {
-  //    return 0;
-  //  }
-
   switch (level) {
     case VVVERBOSE_LEVEL:
       fprintf(stderr, "%s[VVV]   ", CYAN);
