@@ -49,6 +49,7 @@ void convert_to_lcs(reader_t *reader, std::string ofilepath, bool output_txt, bo
   std::unordered_map<uint64_t, struct obj_info> obj_map;
   std::unordered_map<int32_t, int32_t> tenant_cnt;
   std::unordered_map<int32_t, int32_t> ttl_cnt;
+  int n_features = LCS_VER_TO_N_FEATURES[lcs_ver];
 
   lcs_trace_stat_t stat;
   memset(&stat, 0, sizeof(stat));
@@ -131,7 +132,7 @@ void convert_to_lcs(reader_t *reader, std::string ofilepath, bool output_txt, bo
     }
 
     ofile_temp.write(reinterpret_cast<char *>(&lcs_req), sizeof(lcs_req_full_t));
-    for (int i = 0; i < req->n_features; i++) {
+    for (int i = 0; i < n_features; i++) {
       ofile_temp.write(reinterpret_cast<char *>(&req->features[i]), sizeof(int32_t));
     }
 
@@ -379,6 +380,7 @@ static void _reverse_file(std::string ofilepath, lcs_trace_stat_t stat, bool out
       lcs_req_v3_t lcs_req_v3;
       lcs_req_v3.clock_time = lcs_req_full.clock_time;
       lcs_req_v3.obj_id = lcs_req_full.obj_id;
+      lcs_req_v3.ttl = lcs_req_full.ttl;
       lcs_req_v3.obj_size = lcs_req_full.obj_size;
       lcs_req_v3.op = lcs_req_full.op;
       lcs_req_v3.tenant = lcs_req_full.tenant;
@@ -389,6 +391,7 @@ static void _reverse_file(std::string ofilepath, lcs_trace_stat_t stat, bool out
       lcs_req_v3_t base;
       base.clock_time = lcs_req_full.clock_time;
       base.obj_id = lcs_req_full.obj_id;
+      base.ttl = lcs_req_full.ttl;
       base.obj_size = lcs_req_full.obj_size;
       base.op = lcs_req_full.op;
       base.tenant = lcs_req_full.tenant;
