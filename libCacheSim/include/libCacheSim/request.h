@@ -78,7 +78,7 @@ static inline request_t *new_request(void) {
   request_t *req = my_malloc(request_t);
   memset(req, 0, sizeof(request_t));
   req->obj_size = 1;
-  req->op = OP_INVALID;
+  req->op = OP_NOP;
   req->valid = true;
   req->obj_id = 0;
   req->clock_time = 0;

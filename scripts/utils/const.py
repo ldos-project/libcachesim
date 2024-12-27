@@ -15,20 +15,21 @@ PB = 1000 * TB
 EB = 1000 * PB
 
 
-OP_NAMES = [
-    "NOP",
-    "GET",
-    "GETS",
-    "SET",
-    "ADD",
-    "CAS",
-    "REPLACE",
-    "APPEND",
-    "PREPEND",
-    "DELETE",
-    "INCR",
-    "DECR",
-    "READ",
-    "WRITE",
-    "UPDATE",
-]
+OP_NAMES = {
+    0: "NOP",
+    1: "GET",
+    2: "GETS",
+    3: "SET",
+    4: "ADD",
+    5: "CAS",
+    6: "REPLACE",
+    7: "APPEND",
+    8: "PREPEND",
+    9: "DELETE",
+    10: "INCR",
+    11: "DECR",
+    12: "READ",
+    13: "WRITE",
+    14: "UPDATE",
+    255: "INVALID",
+}
