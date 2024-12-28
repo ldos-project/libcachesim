@@ -186,9 +186,9 @@ static void test_LFUCpp(gconstpointer user_data) {
 }
 
 static void test_GDSF(gconstpointer user_data) {
-  uint64_t miss_cnt_true[] = {89068, 84750, 74853, 70488, 67919, 64180, 61029, 58721};
-  uint64_t miss_byte_true[] = {4210604032, 4057062912, 3719372800, 3436728320,
-                               3271431168, 3029728768, 2828587520, 2677800448};
+  uint64_t miss_cnt_true[] = {89070, 84750, 74850, 70490, 67923, 64180, 61027, 58721};
+  uint64_t miss_byte_true[] = {4210726912, 4057058816, 3719176192, 3436855296,
+                               3271648256, 3029728768, 2828456448, 2677800448};
 
   reader_t *reader = (reader_t *)user_data;
   common_cache_params_t cc_params = {.cache_size = CACHE_SIZE, .hashpower = 20, .default_ttl = DEFAULT_TTL};
