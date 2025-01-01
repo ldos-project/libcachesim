@@ -69,7 +69,7 @@ static inline int64_t S3FIFOv0_get_n_obj(const cache_t *cache);
 static inline bool S3FIFOv0_can_insert(cache_t *cache, const request_t *req);
 static void S3FIFOv0_parse_params(cache_t *cache, const char *cache_specific_params);
 
-static void S3FIFOv0_evict_fifo(cache_t *cache, const request_t *req);
+static void S3FIFOv0_evict_small(cache_t *cache, const request_t *req);
 static void S3FIFOv0_evict_main(cache_t *cache, const request_t *req);
 
 // ***********************************************************************
@@ -299,7 +299,7 @@ static cache_obj_t *S3FIFOv0_to_evict(cache_t *cache, const request_t *req) {
   return NULL;
 }
 
-static void S3FIFOv0_evict_fifo(cache_t *cache, const request_t *req) {
+static void S3FIFOv0_evict_small(cache_t *cache, const request_t *req) {
   S3FIFOv0_params_t *params = (S3FIFOv0_params_t *)cache->eviction_params;
   cache_t *small = params->small_fifo;
   cache_t *ghost = params->ghost_fifo;
@@ -406,7 +406,7 @@ static void S3FIFOv0_evict(cache_t *cache, const request_t *req) {
   if (main->get_occupied_byte(main) > main->cache_size || fifo->get_occupied_byte(fifo) == 0) {
     return S3FIFOv0_evict_main(cache, req);
   }
-  return S3FIFOv0_evict_fifo(cache, req);
+  return S3FIFOv0_evict_small(cache, req);
 }
 
 /**
