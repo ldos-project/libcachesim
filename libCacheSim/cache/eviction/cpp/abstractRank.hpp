@@ -68,7 +68,6 @@ class abstractRank {
   inline pq_node_type pop_lowest_score() {
     auto p = pq.begin();
     pq_node_type p_copy(*p);
-    // itr_map.erase(get<0>(*p));
     itr_map.erase(p->obj);
     pq.erase(p);
 
