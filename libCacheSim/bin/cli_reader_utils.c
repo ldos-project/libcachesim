@@ -252,7 +252,7 @@ void cal_working_set_size(reader_t *reader, int64_t *wss_obj, int64_t *wss_byte)
   INFO("calculating working set size...\n");
   while (read_one_req(reader, req) == 0) {
     n_req += 1;
-    if (n_req++ % 2000000 == 0) {
+    if (n_req % 2000000 == 0) {
       DEBUG("processed %ld requests, %lld objects, %lld bytes\n", (long)n_req, (long long)*wss_obj, (long long)*wss_byte);
     }
     if (scaling_factor > 1 && req->obj_id % scaling_factor != 0) {

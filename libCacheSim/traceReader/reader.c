@@ -474,6 +474,7 @@ void reset_reader(reader_t *const reader) {
 #ifdef SUPPORT_ZSTD_TRACE
   if (reader->is_zstd_file) {
     reset_zstd_reader(reader->zstd_reader_p);
+    read_bytes(reader, reader->trace_start_offset);
   }
 #endif
 
