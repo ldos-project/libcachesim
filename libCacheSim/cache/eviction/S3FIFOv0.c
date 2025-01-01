@@ -317,7 +317,6 @@ static void S3FIFOv0_evict_small(cache_t *cache, const request_t *req) {
 #if defined(TRACK_DEMOTION)
       printf("%ld keep %ld %ld\n", cache->n_req, obj_to_evict->create_time, obj_to_evict->misc.next_access_vtime);
 #endif
-      // freq is updated in cache_find_base
       params->n_obj_move_to_main += 1;
       params->n_byte_move_to_main += obj_to_evict->obj_size;
 
@@ -343,7 +342,7 @@ static void S3FIFOv0_evict_small(cache_t *cache, const request_t *req) {
 
     // remove from fifo, but do not update stat
     bool removed = small->remove(small, params->req_local->obj_id);
-    assert(removed);
+    DEBUG_ASSERT(removed);
   }
 }
 
@@ -379,9 +378,7 @@ static void S3FIFOv0_evict_main(cache_t *cache, const request_t *req) {
 #endif
 
       bool removed = main->remove(main, obj_to_evict->obj_id);
-      if (!removed) {
-        ERROR("cannot remove obj %ld\n", (long)obj_to_evict->obj_id);
-      }
+      DEBUG_ASSERT(removed);
 
       has_evicted = true;
     }
