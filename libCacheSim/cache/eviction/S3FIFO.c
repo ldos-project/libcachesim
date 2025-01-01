@@ -39,13 +39,6 @@ typedef struct {
   cache_t *main_fifo;
   bool hit_on_ghost;
 
-  int64_t n_obj_admit_to_small;
-  int64_t n_obj_admit_to_main;
-  int64_t n_obj_move_to_main;
-  int64_t n_byte_admit_to_small;
-  int64_t n_byte_admit_to_main;
-  int64_t n_byte_move_to_main;
-
   int move_to_main_threshold;
   double small_size_ratio;
   double ghost_size_ratio;
@@ -130,14 +123,6 @@ cache_t *S3FIFO_init(const common_cache_params_t ccache_params, const char *cach
 
   ccache_params_local.cache_size = main_fifo_size;
   params->main_fifo = FIFO_init(ccache_params_local, NULL);
-
-#if defined(TRACK_EVICTION_V_AGE)
-  if (params->ghost_fifo != NULL) {
-    params->ghost_fifo->track_eviction_age = false;
-  }
-  params->small_fifo->track_eviction_age = false;
-  params->main_fifo->track_eviction_age = false;
-#endif
 
   snprintf(cache->cache_name, CACHE_NAME_ARRAY_LEN, "S3FIFO-%.4lf-%d", params->small_size_ratio,
            params->move_to_main_threshold);
@@ -265,8 +250,6 @@ static cache_obj_t *S3FIFO_insert(cache_t *cache, const request_t *req) {
   if (params->hit_on_ghost) {
     /* insert into main FIFO */
     params->hit_on_ghost = false;
-    params->n_obj_admit_to_main += 1;
-    params->n_byte_admit_to_main += req->obj_size;
     obj = main->insert(main, req);
   } else {
     /* insert into small fifo */
@@ -274,25 +257,12 @@ static cache_obj_t *S3FIFO_insert(cache_t *cache, const request_t *req) {
       return NULL;
     }
 
-    if (!params->has_evicted &&
-        small->get_occupied_byte(small) >= small->cache_size) {
-      params->n_obj_admit_to_main += 1;
-      params->n_byte_admit_to_main += req->obj_size;
+    if (!params->has_evicted && small->get_occupied_byte(small) >= small->cache_size) {
       obj = main->insert(main, req);
     } else {
-      params->n_obj_admit_to_small += 1;
-      params->n_byte_admit_to_small += req->obj_size;
       obj = small->insert(small, req);
     }
   }
-
-#if defined(TRACK_EVICTION_V_AGE)
-  obj->create_time = CURR_TIME(cache, req);
-#endif
-
-#if defined(TRACK_DEMOTION)
-  obj->create_time = cache->n_req;
-#endif
 
   obj->S3FIFO.freq = 0;
 
@@ -329,27 +299,9 @@ static void S3FIFO_evict_fifo(cache_t *cache, const request_t *req) {
     copy_cache_obj_to_request(params->req_local, obj_to_evict);
 
     if (obj_to_evict->S3FIFO.freq >= params->move_to_main_threshold) {
-#if defined(TRACK_DEMOTION)
-      printf("%ld keep %ld %ld\n", cache->n_req, obj_to_evict->create_time, obj_to_evict->misc.next_access_vtime);
-#endif
       // freq is updated in cache_find_base
-      params->n_obj_move_to_main += 1;
-      params->n_byte_move_to_main += obj_to_evict->obj_size;
-
       cache_obj_t *new_obj = main->insert(main, params->req_local);
-      new_obj->misc.freq = obj_to_evict->misc.freq;
-#if defined(TRACK_EVICTION_V_AGE)
-      new_obj->create_time = obj_to_evict->create_time;
     } else {
-      record_eviction_age(cache, obj_to_evict, CURR_TIME(cache, req) - obj_to_evict->create_time);
-#else
-    } else {
-#endif
-
-#if defined(TRACK_DEMOTION)
-      printf("%ld demote %ld %ld\n", cache->n_req, obj_to_evict->create_time, obj_to_evict->misc.next_access_vtime);
-#endif
-
       // insert to ghost
       if (ghost != NULL) {
         ghost->get(ghost, params->req_local);
@@ -373,9 +325,6 @@ static void S3FIFO_evict_main(cache_t *cache, const request_t *req) {
     cache_obj_t *obj_to_evict = main->to_evict(main, req);
     DEBUG_ASSERT(obj_to_evict != NULL);
     int freq = obj_to_evict->S3FIFO.freq;
-#if defined(TRACK_EVICTION_V_AGE)
-    int64_t create_time = obj_to_evict->create_time;
-#endif
     copy_cache_obj_to_request(params->req_local, obj_to_evict);
     if (freq >= 1) {
       // we need to evict first because the object to insert has the same obj_id
@@ -385,16 +334,9 @@ static void S3FIFO_evict_main(cache_t *cache, const request_t *req) {
       cache_obj_t *new_obj = main->insert(main, params->req_local);
       // clock with 2-bit counter
       new_obj->S3FIFO.freq = MIN(freq, 3) - 1;
-      new_obj->misc.freq = freq;
 
-#if defined(TRACK_EVICTION_V_AGE)
-      new_obj->create_time = create_time;
-#endif
     } else {
-#if defined(TRACK_EVICTION_V_AGE)
-      record_eviction_age(cache, obj_to_evict, CURR_TIME(cache, req) - obj_to_evict->create_time);
-#endif
-
+      // insert to ghost
       bool removed = main->remove(main, obj_to_evict->obj_id);
       if (!removed) {
         ERROR("cannot remove obj %ld\n", obj_to_evict->obj_id);
@@ -474,7 +416,7 @@ static inline bool S3FIFO_can_insert(cache_t *cache, const request_t *req) {
 // ***********************************************************************
 static const char *S3FIFO_current_params(S3FIFO_params_t *params) {
   static __thread char params_str[128];
-  snprintf(params_str, 128, "fifo-size-ratio=%.4lf,ghost-size-ratio=%.4lf,move-to-main-threshold=%d\n",
+  snprintf(params_str, 128, "small-size-ratio=%.4lf,ghost-size-ratio=%.4lf,move-to-main-threshold=%d\n",
            params->small_size_ratio, params->ghost_size_ratio, params->move_to_main_threshold);
   return params_str;
 }
