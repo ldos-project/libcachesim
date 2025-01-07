@@ -31,6 +31,7 @@ static cache_obj_t *GDSF_find(cache_t *cache, const request_t *req, const bool u
 static cache_obj_t *GDSF_insert(cache_t *cache, const request_t *req);
 static cache_obj_t *GDSF_to_evict(cache_t *cache, const request_t *req);
 static void GDSF_evict(cache_t *cache, const request_t *req);
+
 static bool GDSF_remove(cache_t *cache, const obj_id_t obj_id);
 
 // ***********************************************************************
@@ -57,7 +58,7 @@ cache_t *GDSF_init(const common_cache_params_t ccache_params, const char *cache_
   cache->find = GDSF_find;
   cache->insert = GDSF_insert;
   cache->evict = GDSF_evict;
-  cache->to_evict = NULL;
+  cache->to_evict = GDSF_to_evict;
   cache->remove = GDSF_remove;
 
   if (ccache_params.consider_obj_metadata) {
@@ -100,8 +101,7 @@ static void GDSF_free(cache_t *cache) {
  * @return true if cache hit, false if cache miss
  */
 static bool GDSF_get(cache_t *cache, const request_t *req) {
-  cache->n_req += 1;
-
+  auto *gdsf = reinterpret_cast<eviction::GDSF *>(cache->eviction_params);
   cache_obj_t *obj = cache->find(cache, req, true);
   bool hit = (obj != NULL);
 
@@ -111,6 +111,9 @@ static bool GDSF_get(cache_t *cache, const request_t *req) {
       cache->evict(cache, req);
     }
   }
+
+  DEBUG_ASSERT(gdsf->pq.size() == cache->n_obj);
+  DEBUG_ASSERT(gdsf->pq_map.size() == cache->n_obj);
 
   return hit;
 }
@@ -132,19 +135,22 @@ static bool GDSF_get(cache_t *cache, const request_t *req) {
  * @return the object or NULL if not found
  */
 static cache_obj_t *GDSF_find(cache_t *cache, const request_t *req, const bool update_cache) {
+  cache->n_req += 1;
+
   auto *gdsf = reinterpret_cast<eviction::GDSF *>(cache->eviction_params);
   cache_obj_t *obj = cache_find_base(cache, req, update_cache);
   /* this does not consider object size change */
   if (obj != nullptr && update_cache) {
-    /* update frequency */
-    obj->lfu.freq += 1;
+    /* misc frequency is updated in cache_find_base */
+    // obj->misc.freq += 1;
 
-    auto itr = gdsf->itr_map[obj];
-    gdsf->pq.erase(itr);
+    auto node = gdsf->pq_map[obj];
+    gdsf->pq.erase(node);
 
-    double pri = gdsf->pri_last_evict + (double)(obj->lfu.freq) * 1.0e6 / obj->obj_size;
-    itr = gdsf->pq.emplace(obj, pri, cache->n_req).first;
-    gdsf->itr_map[obj] = itr;
+    double pri = gdsf->pri_last_evict + (double)(obj->misc.freq) * 1.0e6 / obj->obj_size;
+    eviction::pq_node_type new_node = {obj, pri, cache->n_req};
+    gdsf->pq.insert(new_node);
+    gdsf->pq_map[obj] = new_node;
   }
 
   return obj;
@@ -213,15 +219,17 @@ static cache_obj_t *GDSF_insert(cache_t *cache, const request_t *req) {
   // however, when it have effect, it often increases miss ratio because a list of small objects (with relatively large
   // priority) will stop the insertion of a large object, however, the newly requested large object is likely to be more
   // useful than the small objects
-  if (!GDSF_can_insert(cache, req)) return nullptr;
+  // if (!GDSF_can_insert(cache, req)) return nullptr;
 
   cache_obj_t *obj = cache_insert_base(cache, req);
-  obj->lfu.freq = 1;
+  DEBUG_ASSERT(obj != nullptr);
+  obj->misc.freq = 1;
 
   double pri = gdsf->pri_last_evict + 1.0e6 / obj->obj_size;
-
-  auto itr = gdsf->pq.emplace(obj, pri, cache->n_req).first;
-  gdsf->itr_map[obj] = itr;
+  eviction::pq_node_type new_node = {obj, pri, cache->n_req};
+  auto r = gdsf->pq.insert(new_node);
+  DEBUG_ASSERT(r.second);
+  gdsf->pq_map[obj] = new_node;
 
   return obj;
 }

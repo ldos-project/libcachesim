@@ -22,33 +22,33 @@ namespace eviction {
 
 /* cache_obj, priority, request_vtime
  * we use request_vtime to order objects with the same priority (FIFO) **/
-// using pq_node_type = tuple<cache_obj_t *, double, int64_t>;
-// const pq_node_type INVALID_PQ_PAIR{nullptr, 0, -1};
-
 struct pq_node_type {
   cache_obj_t *obj;
   double priority;
   int64_t last_request_vtime;
 
+  pq_node_type() {
+    obj = nullptr;
+    priority = -1;
+    last_request_vtime = -1;
+  };
+
   pq_node_type(cache_obj_t *obj, double priority, int64_t last_request_vtime)
-      : obj(obj), priority(priority), last_request_vtime(last_request_vtime){};
+      : obj(obj), priority(priority), last_request_vtime(last_request_vtime) {};
 
   void print() const {
-    printf("obj %lu, priority %f, last_request_vtime %ld\n",
-           (unsigned long)obj->obj_id, priority, (long)last_request_vtime);
+    printf("obj %lu, priority %f, last_request_vtime %ld\n", (unsigned long)obj->obj_id, priority,
+           (long)last_request_vtime);
   }
 
   bool operator<(const pq_node_type &rhs) const {
+    DEBUG_ASSERT(this->last_request_vtime != rhs.last_request_vtime || this->obj->obj_id == rhs.obj->obj_id);
     if (this->priority == rhs.priority) {
       /* use FIFO when objects have the same priority */
       return this->last_request_vtime < rhs.last_request_vtime;
     }
 
     return this->priority < rhs.priority;
-  }
-
-  bool operator==(const pq_node_type &n) {
-    return this->obj->obj_id == n.obj->obj_id;
   }
 };
 
@@ -68,16 +68,16 @@ class abstractRank {
   inline pq_node_type pop_lowest_score() {
     auto p = pq.begin();
     pq_node_type p_copy(*p);
-    itr_map.erase(p->obj);
+    pq_map.erase(p->obj);
     pq.erase(p);
 
     return std::move(p_copy);
   }
 
   inline void remove_obj(cache_t *cache, cache_obj_t *obj) {
-    auto itr = itr_map[obj];
-    pq.erase(itr);
-    itr_map.erase(obj);
+    auto pq_node = pq_map[obj];
+    pq.erase(pq_node);
+    pq_map.erase(obj);
     cache_remove_obj_base(cache, obj, true);
   }
 
@@ -91,8 +91,21 @@ class abstractRank {
     return true;
   }
 
+  void print_keys() {
+    printf("pq size %ld, pq_map size %ld\n", pq.size(), pq_map.size());
+    printf("============= pq =============\n");
+    for (auto &p : pq) {
+      p.print();
+    }
+    printf("============= pq_map =============\n");
+    for (auto &p : pq_map) {
+      printf("key %lu, ", (unsigned long)p.first->obj_id);
+      p.second.print();
+    }
+  }
+
   std::set<pq_node_type> pq{};
-  std::unordered_map<cache_obj_t *, std::set<pq_node_type>::iterator> itr_map{};
+  std::unordered_map<cache_obj_t *, pq_node_type> pq_map;
 
  private:
 };
