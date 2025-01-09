@@ -81,10 +81,10 @@ static inline cache_t *create_cache(const char *trace_path, const char *eviction
     }
   } else if (strcasecmp(eviction_algo, "wtinyLFU") == 0) {
     cache = WTinyLFU_init(cc_params, eviction_params);
-  } else if (strcasecmp(eviction_algo, "belady") == 0) {
+  } else if (strcasecmp(eviction_algo, "belady") == 0 && strcasestr(trace_path, "lcs") == NULL) {
     if (strcasestr(trace_path, "oracleGeneral") == NULL) {
-      WARN("belady is only supported for oracleGeneral trace\n");
-      WARN("to convert a trace to oracleGeneral format\n");
+      WARN("belady is only supported for oracleGeneral and lcs trace\n");
+      WARN("to convert a trace to lcs format\n");
       WARN("./bin/traceConv input_trace trace_format output_trace\n");
       WARN("./bin/traceConv ../data/cloudPhysicsIO.txt txt\n");
       exit(1);
@@ -93,9 +93,9 @@ static inline cache_t *create_cache(const char *trace_path, const char *eviction
   } else if (strcasecmp(eviction_algo, "nop") == 0) {
     cache = nop_init(cc_params, eviction_params);
   } else if (strcasecmp(eviction_algo, "beladySize") == 0) {
-    if (strcasestr(trace_path, "oracleGeneral") == NULL) {
-      WARN("beladySize is only supported for oracleGeneral trace\n");
-      WARN("to convert a trace to oracleGeneral format\n");
+    if (strcasestr(trace_path, "oracleGeneral") == NULL && strcasestr(trace_path, "lcs") == NULL) {
+      WARN("beladySize is only supported for oracleGeneral and lcs trace\n");
+      WARN("to convert a trace to lcs format\n");
       WARN("./bin/traceConv input_trace trace_format output_trace\n");
       WARN("./bin/traceConv ../data/cloudPhysicsIO.txt txt\n");
       exit(1);
