@@ -292,6 +292,8 @@ static cache_t *create_test_cache(const char *alg_name, common_cache_params_t cc
   } else if (strcasecmp(alg_name, "PG") == 0) {
     cache = LRU_init(cc_params, NULL);
     cache->prefetcher = create_prefetcher("PG", NULL, cc_params.cache_size);
+  } else if (strcasecmp(alg_name, "CAR") == 0) {
+    cache = CAR_init(cc_params, NULL);
   } else if (strcasecmp(alg_name, "AdaptSize") == 0) {
     cache = LRU_init(cc_params, NULL);
     cache->admissioner = create_adaptsize_admissioner(NULL);
