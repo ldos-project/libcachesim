@@ -29,10 +29,11 @@ cache_t *cache_struct_init(const char *const cache_name, const common_cache_para
                            const void *const init_params) {
   cache_t *cache = my_malloc(cache_t);
   memset(cache, 0, sizeof(cache_t));
-  strncpy(cache->cache_name, cache_name, CACHE_NAME_ARRAY_LEN);
-
+  strncpy(cache->cache_name, cache_name, CACHE_NAME_ARRAY_LEN-1);
+  cache->cache_name[CACHE_NAME_ARRAY_LEN-1] = '\0';
   if (init_params != NULL) {
-    strncpy(cache->init_params, init_params, CACHE_INIT_PARAMS_LEN);
+    strncpy(cache->init_params, init_params, CACHE_INIT_PARAMS_LEN-1);
+    cache->init_params[CACHE_INIT_PARAMS_LEN-1] = '\0';
   }
   cache->cache_size = params.cache_size;
   cache->eviction_params = NULL;
@@ -474,9 +475,6 @@ bool dump_cached_obj_age(cache_t *cache, const request_t *req, const char *ofile
 }
 
 void generate_cache_name(cache_t *cache, char *str_dest, int str_dest_len) {
-  char admis_name[CACHE_NAME_ARRAY_LEN] = "";
-  char admis_param[CACHE_INIT_PARAMS_LEN] = "";
-
   int len = snprintf(str_dest, str_dest_len, "%s", cache->cache_name);
   assert(len < str_dest_len);
 
