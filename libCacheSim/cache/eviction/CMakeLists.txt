@@ -85,6 +85,12 @@ set(sourceCPP
         LHD/LHD_Interface.cpp
         )
 
+set(sourceCPP
+        ${sourceCPP}
+        PQEvolve/PQEvolve.cpp
+        PQEvolve/PQEvolveInterface.cpp
+)
+
 if (ENABLE_LRB)
     set (sourceCPP ${sourceCPP} 
         LRB/lrb.cpp

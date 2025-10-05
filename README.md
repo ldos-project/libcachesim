@@ -1,5 +1,7 @@
 # libCacheSim - building and running cache simulations
 
+Forked from [libcachesim](https://github.com/1a1a11a/libCacheSim/)
+
 [![build](https://github.com/1a1a11a/libCacheSim/actions/workflows/build.yml/badge.svg)](https://github.com/1a1a11a/libCacheSim/actions/workflows/build.yml)
 
 <!-- TOC start (generated with https://github.com/derlin/bitdowntoc) -->

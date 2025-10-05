@@ -75,6 +75,7 @@ static void _simulate(gpointer data, gpointer user_data) {
   /* using warmup_frac or warmup_sec of requests from reader to warm up */
   if (params->n_warmup_req > 0 || params->warmup_sec > 0) {
     uint64_t n_warmup = 0;
+
     while (req->valid && (n_warmup < params->n_warmup_req || req->clock_time - start_ts < params->warmup_sec)) {
       req->clock_time -= start_ts;
       local_cache->get(local_cache, req);
@@ -88,9 +89,21 @@ static void _simulate(gpointer data, gpointer user_data) {
          local_cache->cache_name, local_cache->cache_size, n_warmup, (double)(req->clock_time - start_ts) / 3600.0);
   }
 
+
+  // #ifdef SIMULATE_MAX_REQUESTS
+  //   long long int total_requests_simulated = 0;
+  // #endif
   while (req->valid) {
     result[idx].n_req++;
     result[idx].n_req_byte += req->obj_size;
+
+    // #ifdef SIMULATE_MAX_REQUESTS
+    //   total_requests_simulated++;
+    //   if(total_requests_simulated >= SIMULATE_MAX_REQUESTS) {
+    //     INFO("Early exit after %d\n", SIMULATE_MAX_REQUESTS);
+    //     break;
+    //   }
+    // #endif
 
     req->clock_time -= start_ts;
     if (local_cache->get(local_cache, req) == false) {

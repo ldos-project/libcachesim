@@ -66,6 +66,8 @@ static inline cache_t *create_cache(const char *trace_path, const char *eviction
     cache = Size_init(cc_params, eviction_params);
   } else if (strcasecmp(eviction_algo, "lfucpp") == 0) {
     cache = LFUCpp_init(cc_params, eviction_params);
+  } else if (strcasecmp(eviction_algo, "PQEvolve") == 0) {
+    cache = PQEvolve_init(cc_params, eviction_params);
   } else if (strcasecmp(eviction_algo, "tinyLFU") == 0) {
     if (eviction_params == NULL) {
       cache = WTinyLFU_init(cc_params, eviction_params);

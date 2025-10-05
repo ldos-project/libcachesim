@@ -14,8 +14,22 @@ example/cacheSimulatorC/cmake-build-debug
 *.log
 fig/
 result/
+
 # Chaos
 sftp-config.json
+
 # Clangd cache
 *.cache/
 .lint-logs/
+
+# ignore all LLM generated code
+libCacheSim/cache/eviction/PQEvolve/LLMCode.h
+**/LLMCode.h
+
+# data files
+*.zst
+*.csv
+*.txt
+*.vscsi
+*.bin
+*.tar.gz
