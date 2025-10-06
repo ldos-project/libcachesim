@@ -1,6 +1,6 @@
 # libCacheSim - building and running cache simulations
 
-Forked from [libcachesim](https://github.com/1a1a11a/libCacheSim/)
+Forked from [libcachesim](https://github.com/1a1a11a/libCacheSim/). See the [PolicySmith](https://github.com/ldos-project/policysmith) repo for more details. 
 
 [![build](https://github.com/1a1a11a/libCacheSim/actions/workflows/build.yml/badge.svg)](https://github.com/1a1a11a/libCacheSim/actions/workflows/build.yml)
 
