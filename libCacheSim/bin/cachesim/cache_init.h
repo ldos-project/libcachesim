@@ -27,6 +27,8 @@ static inline cache_t *create_cache(const char *trace_path, const char *eviction
 
   if (strcasecmp(eviction_algo, "lru") == 0) {
     cache = LRU_init(cc_params, eviction_params);
+  } else if (strcasecmp(eviction_algo, "fullcodeevolve") == 0) {
+    cache = FullCodeEvolve_init(cc_params, eviction_params);
   } else if (strcasecmp(eviction_algo, "fifo") == 0) {
     cache = FIFO_init(cc_params, eviction_params);
   } else if (strcasecmp(eviction_algo, "arc") == 0) {

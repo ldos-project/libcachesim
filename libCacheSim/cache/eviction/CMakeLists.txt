@@ -83,6 +83,7 @@ set(sourceCPP
         cpp/GDSF.cpp
         LHD/lhd.cpp
         LHD/LHD_Interface.cpp
+        FullCodeEvolve/FullCodeEvolveInterface.cpp
         )
 
 if (ENABLE_LRB)

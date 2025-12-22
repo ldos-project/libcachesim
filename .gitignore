@@ -19,3 +19,5 @@ sftp-config.json
 # Clangd cache
 *.cache/
 .lint-logs/
+
+libCacheSim/cache/eviction/FullCodeEvolve/LLMCode.hpp

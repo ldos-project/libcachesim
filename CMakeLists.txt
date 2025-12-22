@@ -262,6 +262,7 @@ file(GLOB cache_source
 
     ${PROJECT_SOURCE_DIR}/libCacheSim/cache/eviction/LHD/*
     ${PROJECT_SOURCE_DIR}/libCacheSim/cache/eviction/cpp/*
+    ${PROJECT_SOURCE_DIR}/libCacheSim/cache/eviction/FullCodeEvolve/*.cpp
 )
 
 if(EXISTS ${PROJECT_SOURCE_DIR}/libCacheSim/cache/eviction/fifo)
