@@ -106,7 +106,7 @@ set(CMAKE_C_VISIBILITY_PRESET default)
 set(CMAKE_VISIBILITY_INLINES_HIDDEN 0)
 
 # Find dependencies
-set(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} "${CMAKE_SOURCE_DIR}/cmake/Modules/")
+set(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} "${PROJECT_SOURCE_DIR}/cmake/Modules/")
 
 # Include GNUInstallDirs for standard installation directories
 include(GNUInstallDirs)
@@ -232,6 +232,7 @@ set(libCacheSim_include_dir
     ${CMAKE_CURRENT_SOURCE_DIR}/libCacheSim/include
     ${CMAKE_CURRENT_SOURCE_DIR}/libCacheSim/utils/include
     ${CMAKE_CURRENT_SOURCE_DIR}/libCacheSim
+    ${CMAKE_CURRENT_SOURCE_DIR}/libvulcan/include
 )
 
 add_subdirectory(${CMAKE_CURRENT_SOURCE_DIR}/libCacheSim/cache)
