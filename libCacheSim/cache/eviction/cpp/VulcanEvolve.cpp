@@ -8,7 +8,6 @@
 
 #include "abstractRank.hpp"
 #include "vulcan.h"
-#include "vulcan.h"
 
 namespace eviction {
 class VulcanEvolve : public abstractRank {
@@ -21,9 +20,10 @@ class VulcanEvolve : public abstractRank {
   vulcan::feature_handle<int64_t> f_ghost;
   vulcan::feature_handle<int64_t> f_curr_time;
 
+  vulcan::store_config store_cfg;
   vulcan::rank_config config;
+  std::shared_ptr<vulcan::feature_store> store;
   std::unique_ptr<vulcan::rank_policy> policy;
-  vulcan::feature_store* store = nullptr;
 
   VulcanEvolve() {
     f_size = registry.object.declare_i64("f_size", "Size of the object (in bytes).");
@@ -33,7 +33,16 @@ class VulcanEvolve : public abstractRank {
     f_ghost = registry.global.declare_i64("f_ghost", "Recently evicted object IDs.");
     f_curr_time = registry.global.declare_i64("f_curr_time", "Current logical time (request sequence number).");
 
+    // The evolved snippet (LLMCode.h) only attaches listeners and assigns
+    // `score_fn`; the fixed RANK wiring below is owned by VulcanEvolve.
     #include "LLMCode.h"
+
+    // Evict the object with the SMALLEST score (e.g. least-recently accessed).
+    config.set_scoring_fn(score_fn);
+    config.set_comparator(vulcan::min);
+    // SampleSort scores a small random subset of cached objects per eviction
+    // instead of all N (FullSort) - keeps eviction cheap (sampled-LRU style).
+    config.set_sorting_function(vulcan::rank::SampleSort);
 
     config.set_information(
       "You are building a cache eviction policy. Whenever the cache is full "
@@ -44,8 +53,9 @@ class VulcanEvolve : public abstractRank {
       "logical time (request sequence number)."
     );
 
-    policy = std::make_unique<vulcan::rank_policy>(vulcan::instantiate_rank_policy(registry, config));
-    store = &(policy->get_feature_store());
+    store = vulcan::make_shared_feature_store(registry, store_cfg);
+    policy = std::make_unique<vulcan::rank_policy>(
+        vulcan::instantiate_rank_policy(registry, config, store));
   }
 };
 }  // namespace eviction
@@ -74,12 +84,13 @@ cache_t *VulcanEvolve_init(const common_cache_params_t ccache_params,
                      const char *cache_specific_params) {
   cache_t *cache = cache_struct_init("VulcanEvolve", ccache_params, cache_specific_params);
   auto *vulcan_evolve = new eviction::VulcanEvolve();
-  f_size_has_listeners = vulcan_evolve->config.has_listeners(vulcan_evolve->f_size);
-  f_insertion_time_has_listeners = vulcan_evolve->config.has_listeners(vulcan_evolve->f_insertion_time);
-  f_last_access_has_listeners = vulcan_evolve->config.has_listeners(vulcan_evolve->f_last_access);
-  f_count_has_listeners = vulcan_evolve->config.has_listeners(vulcan_evolve->f_count);
-  f_ghost_has_listeners = vulcan_evolve->config.has_listeners(vulcan_evolve->f_ghost);
-  f_curr_time_has_listeners = vulcan_evolve->config.has_listeners(vulcan_evolve->f_curr_time);
+  
+  f_size_has_listeners = vulcan_evolve->store->has_listeners(vulcan_evolve->f_size);
+  f_insertion_time_has_listeners = vulcan_evolve->store->has_listeners(vulcan_evolve->f_insertion_time);
+  f_last_access_has_listeners = vulcan_evolve->store->has_listeners(vulcan_evolve->f_last_access);
+  f_count_has_listeners = vulcan_evolve->store->has_listeners(vulcan_evolve->f_count);
+  f_ghost_has_listeners = vulcan_evolve->store->has_listeners(vulcan_evolve->f_ghost);
+  f_curr_time_has_listeners = vulcan_evolve->store->has_listeners(vulcan_evolve->f_curr_time);
   
   if (std::getenv("PRINT_VULCAN_CACHE_PROMPT")) {
     std::cout << vulcan_evolve->policy->get_prompt() << std::endl;
@@ -173,6 +184,7 @@ static void VulcanEvolve_remove_obj(cache_t *cache, cache_obj_t *obj) {
 
 static bool VulcanEvolve_remove(cache_t *cache, obj_id_t obj_id) {
   DEBUG_ASSERT(false);
+  return false;
 }
 
 #ifdef __cplusplus

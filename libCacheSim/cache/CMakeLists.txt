@@ -168,6 +168,10 @@ target_compile_options(cache_lib_c PRIVATE
 
 target_compile_options(cache_lib_cpp PRIVATE
     ${LIBCACHESIM_CXX_FLAGS}
+    # libvulcan's headers (compiled directly into this target via the
+    # ../../libvulcan/src/*.cpp sources) trip -Wshadow; libvulcan's own build
+    # does not enable -Wshadow, so don't let it fail our strict build.
+    -Wno-error=shadow
 )
 
 target_include_directories(cache_lib_c PRIVATE

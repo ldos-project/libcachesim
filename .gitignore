@@ -23,3 +23,6 @@ sftp-config.json
 # Python wheels
 *.whl
 *.zst
+# Generated per-policy scoring snippet injected into VulcanEvolve (written by
+# the evolution loop / evaluator before each build).
+libCacheSim/include/LLMCode.h
