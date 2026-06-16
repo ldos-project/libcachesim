@@ -104,7 +104,7 @@ setup_ubuntu() {
 	sudo apt update
 	sudo apt install -yqq build-essential google-perftools xxhash ninja-build
 	sudo apt install -yqq libglib2.0-dev libunwind-dev
-	sudo apt install -yqq libgoogle-perftools-dev
+	sudo apt install -yqq libgoogle-perftools-dev python3.12-venv
 }
 
 setup_centos() {
@@ -130,29 +130,13 @@ setup_macOS() {
 # Install CMake
 install_cmake() {
 	log_info "Installing CMake..."
-	local cmake_version="3.31.0"
-	local cmake_dir="${HOME}/software/cmake"
-
-	pushd /tmp/ >/dev/null
-	if [[ ! -f "cmake-${cmake_version}-linux-x86_64.sh" ]]; then
-		wget "https://github.com/Kitware/CMake/releases/download/v${cmake_version}/cmake-${cmake_version}-linux-x86_64.sh"
+	if command -v apt-get &>/dev/null; then
+		sudo apt-get install -yqq cmake
+	elif command -v yum &>/dev/null; then
+		sudo yum install -y cmake
+	else
+		log_warn "Package manager not found, skipping CMake installation"
 	fi
-
-	mkdir -p "${cmake_dir}" 2>/dev/null || true
-	bash "cmake-${cmake_version}-linux-x86_64.sh" --skip-license --prefix="${cmake_dir}"
-
-	# Add to shell config files if not already present
-	for shell_rc in "${HOME}/.bashrc" "${HOME}/.zshrc"; do
-		# trunk-ignore(shellcheck/SC2016)
-		if [[ -f ${shell_rc} ]] && ! grep -q 'PATH=$HOME/software/cmake/bin:$PATH' "${shell_rc}"; then
-			# trunk-ignore(shellcheck/SC2016)
-			echo 'export PATH=$HOME/software/cmake/bin:$PATH' >>"${shell_rc}"
-		fi
-	done
-
-	# Source the updated PATH
-	export PATH="${cmake_dir}/bin:${PATH}"
-	popd >/dev/null
 }
 
 # Install XGBoost
@@ -226,12 +210,15 @@ install_zstd() {
 # Main installation logic
 main() {
 	# Detect OS and setup basic dependencies
-	if uname -a | grep -qE "Ubuntu|Debian|WSL"; then
-		setup_ubuntu
-	elif uname -a | grep -q Darwin; then
+	if uname -a | grep -q Darwin; then
 		setup_macOS
-	else
+	elif command -v apt-get &>/dev/null; then
+		setup_ubuntu
+	elif command -v yum &>/dev/null; then
 		setup_centos
+	else
+		log_error "Unsupported OS. This script supports Ubuntu/Debian, CentOS/RHEL, and macOS."
+		exit 1
 	fi
 
 	# Install requested components only on non macOS computers
