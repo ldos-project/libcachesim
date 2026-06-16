@@ -25,4 +25,4 @@ sftp-config.json
 *.zst
 # Generated per-policy scoring snippet injected into VulcanEvolve (written by
 # the evolution loop / evaluator before each build).
-libCacheSim/include/LLMCode.h
+libCacheSim/cache/eviction/cpp/LLMCode.h
