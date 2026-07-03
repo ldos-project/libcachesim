@@ -232,6 +232,7 @@ set(libCacheSim_include_dir
     ${CMAKE_CURRENT_SOURCE_DIR}/libCacheSim/include
     ${CMAKE_CURRENT_SOURCE_DIR}/libCacheSim/utils/include
     ${CMAKE_CURRENT_SOURCE_DIR}/libCacheSim
+    ${CMAKE_CURRENT_SOURCE_DIR}/libvulcan/include
 )
 
 add_subdirectory(${CMAKE_CURRENT_SOURCE_DIR}/libCacheSim/cache)

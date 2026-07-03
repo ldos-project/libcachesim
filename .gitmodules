@@ -1,0 +1,3 @@
+[submodule "libvulcan"]
+	path = libvulcan
+	url = https://github.com/ldos-project/libvulcan.git

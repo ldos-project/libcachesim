@@ -75,6 +75,7 @@ set(eviction_sources_c
 set(eviction_sources_cpp
         eviction/cpp/LFU.cpp
         eviction/cpp/GDSF.cpp
+        eviction/cpp/VulcanPQEvolve.cpp
         eviction/LHD/lhd.cpp
         eviction/LHD/LHD_Interface.cpp
         )
@@ -138,6 +139,10 @@ set(cache_sources_c
 set(cache_sources_cpp
     ${admission_sources_cpp}
     ${eviction_sources_cpp}
+    ${CMAKE_CURRENT_SOURCE_DIR}/../../libvulcan/src/feature_registry.cpp
+    ${CMAKE_CURRENT_SOURCE_DIR}/../../libvulcan/src/feature_store.cpp
+    ${CMAKE_CURRENT_SOURCE_DIR}/../../libvulcan/src/feature_store_modules.cpp
+    ${CMAKE_CURRENT_SOURCE_DIR}/../../libvulcan/src/vulcan.cpp
 )
 
 set(cache_sources
