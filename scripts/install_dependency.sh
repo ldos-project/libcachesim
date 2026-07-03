@@ -105,6 +105,7 @@ setup_ubuntu() {
 	sudo apt install -yqq build-essential google-perftools xxhash ninja-build
 	sudo apt install -yqq libglib2.0-dev libunwind-dev
 	sudo apt install -yqq libgoogle-perftools-dev
+	sudo apt install -yqq cmake libzstd-dev zstd
 }
 
 setup_centos() {
@@ -237,14 +238,6 @@ main() {
 	# Install requested components only on non macOS computers
 	# Libraries already installed on macOS using brew in setup_macOS
 	if ! uname -a | grep -q Darwin; then
-		if [[ ${INSTALL_ALL} == true ]] || [[ ${INSTALL_CMAKE} == true ]]; then
-			install_cmake
-		fi
-
-		if [[ ${INSTALL_ALL} == true ]] || [[ ${INSTALL_ZSTD} == true ]]; then
-			install_zstd
-		fi
-
 		if [[ ${INSTALL_ALL} == true ]] || [[ ${INSTALL_XGBOOST} == true ]]; then
 			if [[ ${GITHUB_ACTIONS-} != "true" ]]; then
 				install_xgboost

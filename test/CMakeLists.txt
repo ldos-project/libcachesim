@@ -25,7 +25,7 @@ function(add_test_executable target_name source_file)
 
     # Add include directories for test compilation
     target_include_directories(${target_name} PRIVATE
-        ${CMAKE_SOURCE_DIR}/libCacheSim  # Add source dir to find utils/include/mymath.h
+        ${PROJECT_SOURCE_DIR}/libCacheSim  # Add source dir to find utils/include/mymath.h
         ${libCacheSim_include_dir}
         ${GLib_INCLUDE_DIRS}
     )

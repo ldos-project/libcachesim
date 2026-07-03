@@ -91,14 +91,14 @@ endif()
 set(LIBCACHESIM_C_FLAGS
     -Wall -Wextra -Werror
     -Wno-unused-variable -Wno-unused-function -Wno-unused-parameter -Wno-unused-but-set-variable
-    -Wpedantic -Wformat=2 -Wformat-security -Wshadow -Wwrite-strings
+    -Wpedantic -Wformat=2 -Wformat-security -Wshadow -Wno-error=shadow -Wwrite-strings
     -Wstrict-prototypes -Wold-style-definition -Wredundant-decls -Wnested-externs -Wmissing-include-dirs
 )
 
 set(LIBCACHESIM_CXX_FLAGS
     -Wall -Wextra -Werror
     -Wno-deprecated-copy -Wno-unused-variable -Wno-unused-function -Wno-unused-parameter -Wno-unused-but-set-variable
-    -Wno-pedantic -Wformat=2 -Wformat-security -Wshadow -Wwrite-strings -Wmissing-include-dirs
+    -Wno-pedantic -Wformat=2 -Wformat-security -Wshadow -Wno-error=shadow -Wno-error=sign-compare -Wwrite-strings -Wmissing-include-dirs
 )
 
 # make sure the symbols are exported so that we can use dlsym
@@ -106,7 +106,7 @@ set(CMAKE_C_VISIBILITY_PRESET default)
 set(CMAKE_VISIBILITY_INLINES_HIDDEN 0)
 
 # Find dependencies
-set(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} "${CMAKE_SOURCE_DIR}/cmake/Modules/")
+set(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} "${PROJECT_SOURCE_DIR}/cmake/Modules/")
 
 # Include GNUInstallDirs for standard installation directories
 include(GNUInstallDirs)
